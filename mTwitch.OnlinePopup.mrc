@@ -8,26 +8,24 @@ alias mTwitch.OnlinePopup.Menu {
       return -
     }
     elseif ($1 == 1) {
-      if ($hget(mTwitch.OnlinePopup, #)) {
-        return Disable Online Popup: mTwitch.OnlinePopup -r #
+      if ($mTwitch.Storage.Get(OnlinePopup, #)) {
+        return Disable Online Popup: noop $!mTwitch.Storage.Del(OnlinePopup,#)
       }
       else {
-        return Enable Online Popup: mTwitch.OnlinePopup #
+        return Enable Online Popup: noop $!mTwitch.Storage.Get(OnlinePopup,#)
       }
     }
   }
 }
 
-alias -l mTwitch.OnlinePopup {
-  if ($1 === -r && $0 == 2) {
-    if ($hget(mTwitch.OnlinePopup, $2)) {
-      hdel mTwitch.OnlinePopup $2
-      hsave mTwitch.OnlinePopup $qt($scriptdirmTwitch.OnlinePopup.dat)
+alias -l mTwitch.OnlinePopup.GetWid {
+  var %x = 0
+  while (%x < $scon(0)) {
+    inc %x
+    scon %x
+    if ($mTwitch.isServer && $window($1)) {
+      return $window($1).wid
     }
-  }
-  else if (!$hget(mTwitch.OnlinePopup, $1)) {
-    hadd -m mTwitch.OnlinePopup $1 $true
-    hsave mTwitch.OnlinePopup $qt($scriptdirmTwitch.OnlinePopup.dat)
   }
 }
 
@@ -70,6 +68,6 @@ on *:START: {
 on *:SIGNAL:mTwitch.Notifications.Online:{
   var %TipName = mTwitch.OnlinePopup.Tip. $+ $1
   if (!$tip(%TipName)) {
-    noop $tip(%TipName, Streamer Online, $mid($1, 2-) is streaming: $+ $crlf $+  $+ $2-, $null, $null, 15, $$mTwitch.GetWid($1), $null)
+    noop $tip(%TipName, Streamer Online, $mid($1, 2-) is streaming: $+ $crlf $+  $+ $2-, $null, $null, 15, $$mTwitch.OnlinePopup.GetWid($1), $null)
   }
 }

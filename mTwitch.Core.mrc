@@ -9,8 +9,8 @@ alias mTwitch.isServer {
       .timer 1 0 .unload -rs $qt($script)
     }
     else {
-      if (!$hget(mTwitch.chatServerList) || !$timer(mTwitch.chatServerListUpdate)) {
-        mTwitch.chatServerListUpdate
+      if (!$hget(mTwitch.IsServer.List) || !$timer(mTwitch.IsServer.UpdateList)) {
+        mTwitch.IsServer.UpdateList
       }
       if (!$len($1-)) {
         tokenize 32 $server
@@ -27,7 +27,7 @@ alias mTwitch.isServer {
       if (!$longip($1)) {
         return $false
       }
-      if ($hget(mTwitch.chatServerList, $1)) {
+      if ($hget(mTwitch.IsServer.List, $1)) {
         var %type = $v1
         if (!$prop || ($prop == isGroup && %type == group)) {
           return $true
@@ -56,37 +56,95 @@ alias mTwitch.StreamIsHosting {
   return $iif($hget(mTwitch.StreamState, $1.hosting), $v1, $false)
 }
 
-alias -l mTwitch.chatServerListUpdate {
+alias mTwitch.ConvertTime {
+  if ($regex($1-, /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z$/)) {
+    return $asctime($calc($ctime($+($gettok(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec, $regml(2), 32) $ord($base($regml(3), 10, 10)), $chr(44) $regml(1) $regml(4), :, $regml(5), :, $regml(6))) + ( $time(z) * 3600)), mmm dd @ HH:nn:ss)
+  }
+}
+
+alias mTwitch.Storage.Add {
+  if ($isid && $0 > 1) {
+    var %x = 1, %key, %item
+    while (%x < $0) {
+      %item = $eval($ $+ %x, 2)
+      if ($regex(%item, [\s\.\*\?])) {
+        return $false
+      }
+      %key = $addtok(%key, %item, 46)
+      inc %x
+    }
+    hadd -m mTwitch %key $($ $+ %x, 2)
+    hsave mTwitch $qt($scriptdirmTwitch.dat)
+    return $true
+  }
+}
+
+alias mTwitch.Storage.Get {
+  if ($isid && $0 > 1) {
+    var %x = 1, %key, %item
+    while (%x <= $0) {
+      %item = $eval($ $+ %x, 2)
+      if ($regex(%item, [\s\.])) {
+        return
+      }
+      %key = $addtok(%key, item, 46)
+      inc %x
+    }
+    return $hget(mTwitch, %key)
+  }
+}
+
+alias mTwitch.Storage.Del {
+  if ($isid && $0 > 1) {
+    var %x = 1, %key, %item
+    while (%x <= $0) {
+      %item = $eval($ $+ %x, 2)
+      if ($regex(%item, [\s\.])) {
+        return $false
+      }
+      %key = $addtok(%key, item, 46)
+      inc %x
+    }
+    hdel $iif(wildcard, -w) mTwitch %key
+    hsave mTwitch $qt($scriptdirmTwitch.dat)
+    return $true
+  }
+}
+
+alias -l mTwitch.IsServer.UpdateList {
   if (!$isid && $JSONVersion) {
-    var %i = 0, %e, %ii = 0, %ee, %s, %n = mTwitch_getChatServerList, %nn = mTwitch_getGroupServerList, %h = mTwitch.chatServerList
+    var %i = 0, %e, %ee, %h, %n, %nn, %h =  mTwitch.IsServer.List, %n =  mTwitch_isServer_ChatServerList, %nn = mTwitch_isServer_GroupServerList
     JSONOpen -ud %n http://api.twitch.tv/api/channels/SReject/chat_properties
-    if ($JSONError) {
-      return 
+    if (!$JSONError) {
+      %e = $JSON(%n, chat_servers, length) 
+      if (%e && !$JSONError) {
+        JSONOpen -ud %nn http://tmi.twitch.tv/servers?cluster=group
+        if (!$JSONError) { 
+          %ee = $JSON(%nn, servers, length)
+          if (%ee && !$JSONError) { 
+            if ($hget(%h)) {
+              hfree $v1
+            }
+            while (%i < %e) {
+              hadd -m %h $gettok($JSON(%n, chat_servers, %i), 1, 58) General
+              inc %i
+            }
+            %i = 0
+            while (%i < %ee) {
+              hadd -m %h $gettok($JSON(%nn, servers, %i), 1, 58) Group
+              inc %i
+            }
+          }
+        }
+      }
     }
-    %e = $JSON(%n, chat_servers, length)
-    if (!%e || $JSONError) {
-      return 
-    }
-    JSONOpen -ud %nn http://tmi.twitch.tv/servers?cluster=group
-    if ($JSONError) { 
-      return
-    }
-    %ee = $JSON(%nn, servers, length)
-    if (!%ee || $JSONError) { 
-      return 
-    }
-    if ($hget(%h)) {
-      hfree $v1
-    }
-    while (%i < %e) {
-      hadd -m %h $gettok($JSON(%n, chat_servers, %i), 1, 58) General
-      inc %i
-    }
-    while (%ii < %ee) {
-      hadd -m %h $gettok($JSON(%nn, servers, %ii), 1, 58) Group
-      inc %ii
-    }
-    .timermTwitch.chatServerListUpdate -io 1 3600 mTwitch.chatServerListUpdate
+    .timermTwitch.isServer.UpdateList -io 1 3600 mTwitch.isServer.UpdateList
+  }
+}
+
+alias -l mTwitch.StreamState.AmOn {
+  if ($mTwitch.isServer && $me ison $1) {
+    set -u0 %mTwitch.StreamState $true
   }
 }
 
@@ -111,35 +169,22 @@ alias -l mTwitch.StreamState.Cleanup {
   }
 }
 
-alias -l mTwitch.StreamState.AmOn {
-  if ($mTwitch.isServer && $me ison $1) {
-    set -u0 %mTwitch.StreamState $true
-  }
-}
-
-alias -l mTwitch.GetWid {
-  var %x = 0
-  while (%x < $scon(0)) {
-    inc %x
-    scon %x
-    if ($mTwitch.isServer && $window($1)) {
-      return $window($1).wid
-    }
-  }
-}
-
 on *:START:{
   if (!$JSONVersion) {
     echo $color(info2) -a [mTwitch->Core] This script depends on SReject's JSON parser to be loaded
     .timer 1 0 .unload -rs $qt($script)
   }
   else {
-    mTwitch.chatServerListUpdate
+    hmake mTwitch 100
+    if ($isfile($scriptdirmTwitch.dat)) {
+      hload mTwitch $qt($scriptdirmTwitch.dat)
+    }
+    mTwitch.IsServer.UpdateList
   }
 }
 
 on *:UNLOAD:{
-  .timermTwitch.chatServerListUpdate off
+  .timermTwitch.isServer.UploadList off
 }
 
 on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* LS (\x3A.*)$/:{

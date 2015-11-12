@@ -2,12 +2,15 @@ alias mTwitch.has.OAuth {
   return 0000.0000.0002
 }
 
-alias mTwitch.OAuthConfig {
+alias mTwitch.OAuth.Config {
   dialog -m mTwitch.OAuth mTwitch.OAuth
 }
 
 alias mTwitch.OAuth.Generate {
-  var %uri = $hget(mTwitch.OAuth, app_uri), %clientId = $hget(mTwitch.OAuth, app_clientId), %secret = $hget(mTwitch.OAuth, app_secret), %err, %port = 80, %url
+  var %uri, %clientid, %secret, %err, %port = 80, %url
+  %uri      = $mTwitch.Storage.Get(OAuth, app_uri)
+  %clientid = $mTwitch.Storage.Get(OAuth, app_clientid)
+  %secret   = $mTwitch.Storage.Get(OAuth, app_secret)
   if (!$len(%uri)) {
     %err = Twitch App Redirect URI not specified
   }
@@ -43,7 +46,7 @@ alias mTwitch.OAuth.Generate {
     echo $color(info) -a [mTwitch->OAuth] %err
   }
   else {
-    %uri = $urlencode(%uri)
+    %uri = $mTwitch.OAuth.UrlEncode(%uri)
     socklisten mTwitch.OAuth.Listener %port
     sockmark mTwitch.OAuth.Listener %clientId %secret %uri
     %url = https://api.twitch.tv/kraken/oauth2/authorize?response_type=code
@@ -51,15 +54,15 @@ alias mTwitch.OAuth.Generate {
     %url = %url $+ &redirect_uri= $+ %uri
     %url = %url $+ &client_id= $+ %clientId
     run %url
-    $+(.timer, mTwitch.OAuth.Listener) -oi 1 30 cleanup mTwitch.OAuth.Listener
+    $+(.timer, mTwitch.OAuth.Listener) -oi 1 30 mTwitch.OAuth.Cleanup mTwitch.OAuth.Listener
   }
 }
 
-alias -l urlencode {
+alias -l mTwitch.OAuth.UrlEncode {
   return $regsubex($1-, /([^a-z\d])/g, % $+ $base($asc(\t), 10, 16, 2))
 }
 
-alias -l cleanup {
+alias -l mTwitch.OAuth.Cleanup {
   if ($sock($1)) {
     sockclose $v1
   }
@@ -93,31 +96,21 @@ dialog -l mTwitch.OAuth {
 }
 
 on *:LOAD:{
-  if ($isfile($scriptdirmTwitch.OAuth.dat)) {
-    .remove $qt($scriptdirmTwitch.OAuth.dat)
-  }
-  if ($hget(mTwitch.OAuth)) {
-    hfree $v1
-  }
-  mTwitch.OAuthConfig
+  mTwitch.OAuth.Config
 }
-
-on *:START:{
-  hmake mTwitch.OAuth 1
-  if ($isfile($scriptdirmTwitch.OAuth.dat)) {
-    hload mTwitch.OAuth $qt($scriptdirmTwitch.OAuth.dat)
-  }
+on *:UNLOAD:{
+  noop $mTwitch.Storage.Del(OAuth, *).wildcard
 }
 
 on *:DIALOG:mTwitch.OAuth:init:0:{
   if ($hget(mTwitch.OAuth)) {
-    if ($hget(mTwitch.OAuth, app_uri)) {
+    if ($mTwitch.Storage.Get(OAuth, app_uri)) {
       did -ra $dname 10 $v1
     }
-    if ($hget(mTwitch.OAuth, app_clientid)) {
+    if ($mTwitch.Storage.Get(OAuth, app_clientid)) {
       did -ra $dname 13 $v1
     }
-    if ($hget(mTwitch.OAuth, app_secret)) {
+    if ($mTwitch.Storage.Get(OAuth, app_secret)) {
       did -ra $dname 16 $v1
     }
   }
@@ -142,17 +135,10 @@ on *:DIALOG:mTwitch.OAuth:sclick:17:{
     noop $input(The specified Twitch App Secret Key is invalid; please try again, o, Invalid App Secret Key)
   }
   else {
-    if ($hget(mTwitch.OAuth)) {
-      hfree mTwitch.OAuth
-    }
-    hadd -m mTwitch.OAuth app_uri $did($dname, 10).text
-    hadd -m mTwitch.OAuth app_clientid $did($dname, 13).text
-    hadd -m mTwitch.OAuth app_secret $did($dname, 16).text
-    if ($isfile($scriptdirmTwitch.OAuth.dat)) {
-      .remove $qt($scriptdirmTwitch.OAuth.dat)
-    }
-    hsave mTwitch.OAuth $qt($scriptdirmTwitch.OAuth.dat)
-    dialog -x $dname
+    noop $mTwitch.Storage.Del(OAuth, *)
+    noop $mTwitch.Storage.Add(OAuth, app_uri, $did($dname, 10).text)
+    noop $mTwitch.Storage.Add(OAuth, app_clientid, $did($dname, 13).text)
+    noop $mTwitch.Storage.Add(OAuth, app_secret, $did($dname, 16)
   }
 }
 
@@ -168,24 +154,24 @@ on *:SOCKLISTEN:mTwitch.OAuth.Listener:{
     %sock = mTwitch.OAuth.Client $+ %sock
     sockaccept %sock
     sockmark %sock $sock($sockname).mark
-    $+(.timer, %sock) -io 1 30 cleanup %sock
+    $+(.timer, %sock) -io 1 30 mTwitch.OAuth.Cleanup %sock
   }
 }
 
 on *:SOCKWRITE:mTwitch.OAuth.Client*:{
   if ($sockerr) {
-    cleanup $sockname
+    mTwitch.OAuth.Cleanup $sockname
     echo $color(info) -a [mTwitch->OAuth] Unable to send data to connected client
   }
   elseif (!$sock($sockname).rq && $sock($sockname).mark === closing) {
-    cleanup $sockname
+    mTwitch.OAuth.Cleanup $sockname
   }
 }
 
 on *:SOCKREAD:mTwitch.OAuth.Client*:{
   var %w = sockwrite -n $sockname, %headers, %request, %body
   if ($sockerr) {
-    cleanup $sockname
+    mTwitch.OAuth.Cleanup $sockname
     echo $color(info) -a [mTwitch->OAuth] Client sockread error
   }
   elseif ($sock($sockname).mark !== closing) {
@@ -224,7 +210,7 @@ on *:SOCKREAD:mTwitch.OAuth.Client*:{
       %w
     }
     else {
-      cleanup mTwitch.OAuth.Listener
+      mTwitch.OAuth.Cleanup mTwitch.OAuth.Listener
       %w HTTP 200 OK
       %w Connection: close
       %w Content-Type: text/plain
@@ -249,7 +235,7 @@ on *:SOCKREAD:mTwitch.OAuth.Client*:{
 }
 
 on *:SOCKCLOSE:mTwitch.OAuth.Client*:{
-  cleanup $sockname
+  mTwitch.OAuth.Cleanup $sockname
   if ($sockerr) {
     echo $color(info) -a [mTwitch->OAuth] Client disconnected unexpectedly
   }

@@ -31,7 +31,7 @@ alias mTwitch.StateToTopic {
           while (%y < %len) {
             %stream = $JSON(mTwitch.StateToTopic, streams, %y, channel, name)
             %chan = $chr(35) $+ %stream
-            %since = $ConvertTime($JSON(mTwitch.StateToTopic, streams, %y, created_at))
+            %since = $mTwitch.ConvertTime($JSON(mTwitch.StateToTopic, streams, %y, created_at))
             %playing = $JSON(mTwitch.StateToTopic, streams, %y, game)
             %title = $JSON(mTwitch.StateToTopic, streams, %y, channel, status)
             hadd -m mTwitch.StreamState $+(%chan, .online) $true
@@ -68,12 +68,6 @@ alias -l mTwitch.StateToTopic.Set {
       }
       .parseline -iqptu0 :jtv!jtv@jtv.twitch.tv TOPIC $1 : $+ %topic
     }
-  }
-}
-
-alias -l ConvertTime {
-  if ($regex($1-, /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z$/)) {
-    return $asctime($calc($ctime($+($gettok(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec, $regml(2), 32) $ord($base($regml(3), 10, 10)), $chr(44) $regml(1) $regml(4), :, $regml(5), :, $regml(6))) + ( $time(z) * 3600)), mmm dd @ HH:nn:ss)
   }
 }
 
