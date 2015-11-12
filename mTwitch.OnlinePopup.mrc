@@ -38,30 +38,12 @@ on *:LOAD: {
     echo $color(info) -a [mTwitch->OnlinePopup] mTwitch.Core.mrc is required
     .timer 1 0 .unload -rs $qt($script)
   }
-  else {
-    hmake mTwitch.OnlinePopup
-    if ($isfile($scriptdirmTwitch.OnlinePopup.dat)) {
-      hload mTwitch.OnlinePopup $qt($scriptdirmTwitch.OnlinePopup.dat)
-    }
-    else {
-      hsave mTwitch.OnlinePopup $qt($scriptdirmTwitch.OnlinePopup.dat)
-    }
-  }
 }
 
 on *:START: { 
   if (!$mTwitch.has.Core) {
     echo $color(info) -a [mTwitch->OnlinePopup] mTwitch.Core.mrc is required
     .timer 1 0 .unload -rs $qt($script)
-  }
-  else {
-    hmake mTwitch.OnlinePopup
-    if ($isfile($scriptdirmTwitch.OnlinePopup.dat)) {
-      hload mTwitch.OnlinePopup $qt($scriptdirmTwitch.OnlinePopup.dat)
-    }
-    else {
-      hsave mTwitch.OnlinePopup $qt($scriptdirmTwitch.OnlinePopup.dat)
-    }
   }
 }
 
