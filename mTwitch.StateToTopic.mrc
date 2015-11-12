@@ -112,3 +112,4 @@ alias -l ConvertTime {
     return $asctime($calc($ctime($+($gettok(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec, $regml(2), 32) $ord($base($regml(3), 10, 10)), $chr(44) $regml(1) $regml(4), :, $regml(5), :, $regml(6))) + ( $time(z) * 3600)), mmm dd @ HH:nn:ss)
   }
 }
+
