@@ -3,8 +3,8 @@ mTwitch is a modulizer set of scripts to help conform twitch more closely to the
 
 # Requirments and Dependacies
 * `mTwitch.core.mrc` is required by all other scripts here in this repo
-* Due to a dependacy in mTwitch.core.mrc [my json parser] is required
-* Due to a dependacy with in my JSON parser, these scripts only work under windows(XP+). They do not work under WINE
+* Due to a dependacy in `mTwitch.core.mrc` [my json parser](http://hawkee.com/snippet/10194/) is required
+* Windows XP+: Due to a dependacy in my JSON parser, these scripts will not work under WINE
 * mIRC v7.43
 
 
