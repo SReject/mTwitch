@@ -110,6 +110,17 @@ alias mTwitch.Storage.Del {
     return $true
   }
 }
+alias mTwitch.UrlEncode {
+  return $regsubex($1, /(\W| )/g, % $+ $base($asc(\1), 10, 16, 2))
+}
+
+alias mTwitch.MsgTags {
+  var %tok = $wildtok($iif(@* iswm $1, $mid($1, 2-), $1), $2 $+ =*, $iif($0 > 2, $3, 1), 59)
+  if ($0 > 2 && $3 == 0) {
+    return %tok
+  }
+  return $regsubex($mTwitch.MsgTags.Unescape($gettok(%tok, 2, 61)), /\\(.)/g, $_xmsgtags(\t))
+}
 
 alias -l mTwitch.IsServer.UpdateList {
   if (!$isid && $JSONVersion) {
@@ -167,6 +178,15 @@ alias -l mTwitch.StreamState.Cleanup {
       inc %x
     }
   }
+}
+
+alias -l mTwitch.MsgTags.Unescape {
+  if ($1 == s) returnex $chr(32)
+  if ($1 == r) return $cr
+  if ($1 == l) return $lf
+  if ($1 == :) return ;
+  if ($1 == \) return
+  return $1
 }
 
 on *:START:{

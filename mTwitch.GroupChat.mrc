@@ -110,7 +110,7 @@ on *:SOCKOPEN:mTwitch.GroupChat.*:{
   }
   elseif ($sockerr) {
     scid $1
-    echo $color(info) -a [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed to open; retrying...
+    echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed to open; retrying...
     mTwitch.GroupChat.Cleanup %sock
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
@@ -129,7 +129,7 @@ on *:SOCKWRITE:mTwitch.GroupChat.*:{
   }
   elseif ($sockerr) {
     scid $1
-    echo $color(info) -a [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed; attempting to reconnect...
+    echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed; attempting to reconnect...
     mTwitch.GroupChat.Cleanup $sockname
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
@@ -154,7 +154,7 @@ on *:SOCKREAD:mTwitch.GroupChat.*:{
   }
   elseif ($sockerr) {
     scid $1
-    echo $color(info) -a [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed; attempting to reconnect...
+    echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed; attempting to reconnect...
     mTwitch.GroupChat.Cleanup $sockname
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
@@ -177,7 +177,7 @@ on *:SOCKCLOSE:mTwitch.GroupChat.*:{
   else {
     scid $1
     mTwitch.GroupChat.Cleanup $sockname
-    echo $color(info) -a [mTwitch->GroupChat] Connection to Twitch Group-Chat server lost; attempting to reconnect...
+    echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server lost; attempting to reconnect...
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
 }
