@@ -110,6 +110,7 @@ alias mTwitch.Storage.Del {
     return $true
   }
 }
+
 alias mTwitch.UrlEncode {
   return $regsubex($1, /(\W| )/g, % $+ $base($asc(\1), 10, 16, 2))
 }

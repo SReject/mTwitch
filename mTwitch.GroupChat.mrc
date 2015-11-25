@@ -85,11 +85,13 @@ on *:START:{
     .unload -rs $qt($script)
   }
 }
+
 on $*:PARSELINE:out:/^PASS (oauth\x3A[a-zA-Z\d]{30,32})$/:{
   if ($mTwitch.isServer && !$mTwitch.isServer().isGroup) {
     mTwitch.GroupChat.Connect $cid $me $regml(1)
   }
 }
+
 on $*:PARSELINE:out:/^PRIVMSG (?!=jtv|#)(\S+) :(.*)$/i:{
   if ($mTwitch.isServer && !$mTwitch.isServer().isGroup) {
     if ($sock(mTwitch.GroupChat. $+ $cid) && $hget(mTwitch.GroupChat. $+ $cid, loggedIn)) {
@@ -98,11 +100,13 @@ on $*:PARSELINE:out:/^PRIVMSG (?!=jtv|#)(\S+) :(.*)$/i:{
     halt
   }
 }
+
 on *:DISCONNECT:{
   if ($mTwitch.isServer && $sock(mTwitch.GroupChat. $+ $cid)) {
     mTwitch.GroupChat.Cleanup mTwitch.GroupChat.Connection $+ $cid
   }
 }
+
 on *:SOCKOPEN:mTwitch.GroupChat.*:{
   tokenize 32 $sock($sockname).mark
   if ($0 !== 3) {

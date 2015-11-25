@@ -98,6 +98,7 @@ dialog -l mTwitch.OAuth {
 on *:LOAD:{
   mTwitch.OAuth.Config
 }
+
 on *:UNLOAD:{
   noop $mTwitch.Storage.Del(OAuth, *).wildcard
 }
