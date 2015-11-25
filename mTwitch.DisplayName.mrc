@@ -12,7 +12,7 @@ on $*:PARSELINE:in:/^(@\S+) \x3A([^!@\s]+)(![^@\s]+@\S+ PRIVMSG \x23\S+ \x3A.*)$
   if ($mTwitch.isServer) {
     tokenize 32 $parseline
     var %tags = $regml(1), %nick = $regml(2), %param = $regml(3), %dnick = $remove($mTwitch.MsgTags(%tags, display-name), $chr(32), $cr, $lf)
-    if (%dnick !=== %nick) {
+    if ($len(%dnick) && %dnick !=== %nick) {
       .parseline -itu0 %tags $+(:, %dnick, %param)
     }
   }
