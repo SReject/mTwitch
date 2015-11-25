@@ -209,7 +209,24 @@ on *:UNLOAD:{
 }
 
 on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* LS (\x3A.*)$/:{
-  raw CAP REQ $regml(2)
+  if ($mTwitch.isServer) {
+    set -e $+(%,$cid,mTwitch.CapAcceptHalt) $true
+    .raw CAP REQ $regml(2)
+  }
+}
+
+on $*:PARSELINE:out:/^CAP END$/:{
+  if ($mTwitch.isServer && $($+(%, $cid, mTwitch.CapAcceptHalt), 2)) {
+    .parseline -otn
+  }
+}
+
+on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* ACK \x3A/:{
+  echo 07 -s $parseline
+  if ($mTwitch.isServer && $($+(%, $cid, mTwitch.CapAcceptHalt), 2)) {
+    .raw CAP END
+    unset $+(%, $cid, mTwitch.CapAcceptHalt)
+  }
 }
 
 on $*:PARSELINE:out:/^JOIN (#\S+)$/i:{
@@ -220,7 +237,7 @@ on $*:PARSELINE:out:/^JOIN (#\S+)$/i:{
 }
 
 raw 004:*:{
-  if ($mTwitch.isServer()) {
+  if ($mTwitch.isServer) {
     .parseline -iqptu0 :tmi.twitch.tv 005 $me NETWORK= $+ $iif($mTwitch.isServer().isGroup, groupchat.,) $+ twitch.tv :are supported by this server
   } 
 }
@@ -250,6 +267,7 @@ raw *:*:{
 on ^*:DISCONNECT:{
   if ($mTwitch.isServer) {
     mTwitch.StreamState.Cleanup
+    unset $+(%, $cid, mTwitch.CapAcceptHalt)
   }
 }
 
