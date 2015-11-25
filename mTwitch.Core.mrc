@@ -211,6 +211,13 @@ on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* LS (\x3A.*)$/:{
   raw CAP REQ $regml(2)
 }
 
+on $*:PARSELINE:out:/^JOIN (#\S+)$/i:{
+  if ($lower($regml(1)) !=== $regml(1)) {
+    join $v1
+    .parseline -otn
+  }
+}
+
 raw 004:*:{
   if ($mTwitch.isServer()) {
     .parseline -iqptu0 :tmi.twitch.tv 005 $me NETWORK= $+ $iif($mTwitch.isServer().isGroup, groupchat.,) $+ twitch.tv :are supported by this server
