@@ -8,6 +8,11 @@ mTwitch is a modulizer set of scripts for mIRC to help conform twitch more close
 * mTwitch.core.mrc is required by all other scripts here in the repo
 
 # Wiki
-For more information about each script, refer to the [wiki](https://github.com/SReject/mTwitch/wiki)
+Information about what each script does can be found on the [wiki](https://github.com/SReject/mTwitch/wiki).
+
+# Help Needed
+If you would like to help, simply clone the repo, make updates and make a pull request.  
+
+Help is needed for documenting, via the wiki, what each script currently does, commenting code, and adding features. Feel free to make pull-requests for any of the above and if applicatable I will merge the request.
 
 
