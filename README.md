@@ -13,6 +13,9 @@ Information about what each script does can be found on the [wiki](https://githu
 # Help Needed
 If you would like to help, simply clone the repo, make updates and make a pull request.  
 
-Help is needed for documenting, via the wiki, what each script currently does, commenting code, and adding features. Feel free to make pull-requests for any of the above and if applicatable I will merge the request.
+Help is needed for documenting, via the wiki, what each script currently does, commenting code, and adding features. Feel free to make pull-requests for any of the above and if applicatable I will merge the request.  
+
+# Contact
+I can be contacted on Twitch in #[mirchelp](http://twitch.tv/mirchelp)'s stream, or on [SwiftIRC](irc://irc.swift.net:6667/mircscripting)
 
 
