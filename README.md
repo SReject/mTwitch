@@ -1,5 +1,5 @@
 # mTwitch
-mTwitch is a modulizer set of scripts for mIRC to help conform twitch more closely to the IRC standard and to make twitch more accessible from within the mIRC enviornment
+mTwitch is a modulizer set of scripts for mIRC to help conform twitch more closely to the IRC standard and to make twitch more accessible from within the mIRC enviornment. More information about what each module does can be found on the *[wiki](https://github.com/SReject/mTwitch/wiki)*. 
 
 # Requirements and Dependencies
 * mIRC v7.43
@@ -16,9 +16,6 @@ mTwitch is a modulizer set of scripts for mIRC to help conform twitch more close
 6. Select the script(s) and then click `Open`
 7. Click `OK`
 8. If a box pops up asking if you wish to run initialization commands, click `OK`
-
-# Wiki
-Information about what each script does can be found on the [wiki](https://github.com/SReject/mTwitch/wiki).
 
 # Help Needed
 If you would like to help simply clone the repo, make updates and make a pull request. If applicatable your request will be merged with the master branch. Help is needed for adding features, commenting/cleaning up code and wiki documentation.
