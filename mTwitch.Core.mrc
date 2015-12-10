@@ -222,16 +222,15 @@ on $*:PARSELINE:out:/^CAP END$/:{
 }
 
 on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* ACK \x3A/:{
-  echo 07 -s $parseline
   if ($mTwitch.isServer && $($+(%, $cid, mTwitch.CapAcceptHalt), 2)) {
     .raw CAP END
     unset $+(%, $cid, mTwitch.CapAcceptHalt)
   }
 }
 
-on $*:PARSELINE:out:/^JOIN (#\S+)$/i:{
+on $*:PARSELINE:out:/^JOIN #?(\S+)$/i:{
   if ($lower($regml(1)) !=== $regml(1)) {
-    join $v1
+    join $chr(35) $+ $v1
     .parseline -otn
   }
 }
@@ -257,8 +256,8 @@ raw *:*:{
       }
       haltdef
     }
-    elseif ($0 == 5 && :tmi.twitch.tv HOSTTARGET == $1-2 && $me ison $3) {
-      hadd -m mTwitch.StreamState $3.hosting $iif($4 == -, $false, $4)
+    elseif ($regex($1-, /^:(?:tmi|irc)\.twitch\.tv HOSTTARGET #\S+ :(\S+) \d+$/i) && $me ison #3) {
+      hadd -m mTwitch.StreamState $3.hosting $iif($regml(1) == -, $false, $v1)
       haltdef
     }
   }
