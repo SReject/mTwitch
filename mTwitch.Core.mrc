@@ -256,7 +256,7 @@ raw *:*:{
       }
       haltdef
     }
-    elseif ($regex($1-, /^:(?:tmi|irc)\.twitch\.tv HOSTTARGET #\S+ :(\S+) \d+$/i) && $me ison #3) {
+    elseif ($regex($1-, /^:(?:tmi|irc)\.twitch\.tv HOSTTARGET #\S+ :(\S+) \d+$/i) && $me ison $3) {
       hadd -m mTwitch.StreamState $3.hosting $iif($regml(1) == -, $false, $v1)
       haltdef
     }
