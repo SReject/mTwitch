@@ -1,6 +1,8 @@
 # mTwitch
 mTwitch is a modulizer set of scripts for mIRC to help conform twitch more closely to the IRC standard and to make twitch more accessible from within the mIRC enviornment. More information about what each module does can be found on the **[wiki](https://github.com/SReject/mTwitch/wiki)**. 
 
+If you appreciate the work done, consider donating via paypal: froggiedafrog@aim.com
+
 # Requirements and Dependencies
 * mIRC v7.43
 * Windows XP+: Due to a dependency in the JSON parser these scripts will not work under WINE
