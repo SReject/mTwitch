@@ -136,10 +136,11 @@ on *:DIALOG:mTwitch.OAuth:sclick:17:{
     noop $input(The specified Twitch App Secret Key is invalid; please try again, o, Invalid App Secret Key)
   }
   else {
+    echo -s >> $did($dname, 10).text
     noop $mTwitch.Storage.Del(OAuth, *)
     noop $mTwitch.Storage.Add(OAuth, app_uri, $did($dname, 10).text)
     noop $mTwitch.Storage.Add(OAuth, app_clientid, $did($dname, 13).text)
-    noop $mTwitch.Storage.Add(OAuth, app_secret, $did($dname, 16)
+    noop $mTwitch.Storage.Add(OAuth, app_secret, $did($dname, 16).text)
   }
 }
 

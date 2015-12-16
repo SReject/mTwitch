@@ -1,15 +1,11 @@
 alias mTwitch.has.StateToTopic {
-  0000.0000.0008
+  0000.0000.0009
 }
 
 alias mTwitch.StateToTopic {
   if (!$isid && !$0 && $status == connected && $mTwitch.isServer) {
-
     .timermTwitch.StateToTopic -io 1 300 mTwitch.StateToTopic
-
     var %x = 1, %streams, %len, %y, %stream, %chan, %since, %game, %title, %topic, %host, %sub, %slow, %r9k
-
-    ;; build a list of streams to retrieve stream information about
     hmake mTwitch.StateToTopic.Streams 1
     while ($scon(%x)) {
       scon %x
@@ -24,30 +20,22 @@ alias mTwitch.StateToTopic {
       }
       inc %x
     }
-
-    ;; loop over streams list
     %x = 1
     while ($hget(mTwitch.StateToTopic.Streams, %x).item) {
-
       %streams = $addtok(%streams, $mid($v1, 2-), 44)
       if (!$calc($numtok(%streams, 44) % 10) || (%streams && %x == $hget(mTwitch.StateToTopic.Streams, 0).item)) {
-
         JSONOpen -u mTwitch.StateToTopic https://api.twitch.tv/kraken/streams?channel= $+ %streams
-
         if (!$JSONError) {
           %len = $JSON(mTwitch.StateToTopic, streams, length)
           %y = 0
           while (%y < %len) {
             %chan = $chr(35) $+ $JSON(mTwitch.StateToTopic, streams, %y, channel, name)
-
             %since = $mTwitch.ConvertTime($JSON(mTwitch.StateToTopic, streams, %y, created_at))
             %game = $JSON(mTwitch.StateToTopic, streams, %y, game)
             %title = $JSON(mTwitch.StateToTopic, streams, %y, channel, status)
-
             hadd -m mTwitch.StreamState $+(%chan, .online) $true
             hadd -m mTwitch.StreamState $+(%chan, .playing) %game
             hadd -m mTwitch.StreamState $+(%chan, .title) %title
-
             hadd -m mTwitch.StateToTopic.Streams %chan Online since %since -- Playing: %game -- Title: %title
             inc %y
           }
@@ -59,7 +47,7 @@ alias mTwitch.StateToTopic {
     }
     %x = 1
     while ($hget(mTwitch.StateToTopic.Streams, %x).item) {
-      scon -a mTwitch.StateToTopic.Set $v1 $hget(mTwitch.StateToTopic.Streams, $v1)
+      scon -a mTwitch.StateToTopic.Set $v1
       inc %x
     }
     hfree mTwitch.StateToTopic.Streams
@@ -68,14 +56,12 @@ alias mTwitch.StateToTopic {
 
 alias -l mTwitch.StateToTopic.Set {
   if ($mTwitch.isServer && !$mTwitch.isServer().isGroup && $me ison $1) {
-
+    var %topic = $hget(mTwitch.StateToTopic.Streams, $1)
     var %host = $iif($mTwitch.StreamIsHosting($1), [Hosting: $+ $v1 $+ ])
     var %sub = $iif($mTwitch.ChatIsSubOnly($1), [SubOnly])
     var %slow = $iif($mTwitch.ChatIsSlow($1).dur, [Slow: $+ $ceil($calc($v1 /60)) $+ m])
     var %r9k = $iif($mTwitch.ChatIsR9k($1), [R9K])
-
-    var %topic = $iif($2- == -, Offline, $2-) $regsubex($iif(%host || %sub || %slow || %r9k, -- %host %sub %slow %r9k), /\s(?=\x20|$)/g, $chr(32))
-
+    %topic = $iif(%topic == -, Offline, %topic) $regsubex($iif(%host || %sub || %slow || %r9k, -- %host %sub %slow %r9k), /\s(?=\x20|$)/g, $chr(32))
     if ($chan($1).topic !== %topic) {
       if (Offline* iswm $chan($1).topic && Online* iswm %topic) {
         .signal mTwitch.Notifications.Online $1 $hget(mTwitch.StreamState, $1.playing)

@@ -87,7 +87,7 @@ alias mTwitch.Storage.Get {
       if ($regex(%item, [\s\.])) {
         return
       }
-      %key = $addtok(%key, item, 46)
+      %key = $addtok(%key, %item, 46)
       inc %x
     }
     return $hget(mTwitch, %key)
