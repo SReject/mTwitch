@@ -66,7 +66,7 @@ alias -l mTwitch.StateToTopic.Set {
       if (Offline* iswm $chan($1).topic && Online* iswm %topic) {
         .signal mTwitch.Notifications.Online $1 $hget(mTwitch.StreamState, $1.playing)
       }
-      .parseline -iqptu0 :jtv!jtv@jtv.twitch.tv TOPIC $1 : $+ %topic
+      .parseline -iqpt :jtv!jtv@jtv.twitch.tv TOPIC $1 : $+ %topic
     }
   }
 }

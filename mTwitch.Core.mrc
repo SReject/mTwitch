@@ -237,7 +237,7 @@ on $*:PARSELINE:out:/^JOIN #?(\S+)$/i:{
 
 raw 004:*:{
   if ($mTwitch.isServer) {
-    .parseline -iqptu0 :tmi.twitch.tv 005 $me NETWORK= $+ $iif($mTwitch.isServer().isGroup, groupchat.,) $+ twitch.tv :are supported by this server
+    .parseline -iqpt :tmi.twitch.tv 005 $me NETWORK= $+ $iif($mTwitch.isServer().isGroup, groupchat.,) $+ twitch.tv :are supported by this server
   } 
 }
 

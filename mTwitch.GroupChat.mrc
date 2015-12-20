@@ -29,16 +29,16 @@ alias -l mTwitch.GroupChat.Parse {
       if (%tok isnum 1-5 || %tok == 372 || %tok == 375 || %tok == 376) {
         return
       }
-      .parseline -iqptu0 :tmi.twitch.tv $2-
+      .parseline -iqpt :tmi.twitch.tv $2-
     }
     elseif ($regex($1-, /^(@\S+ [^!@\s]+![^@\s]+@\S+) WHISPER \S+ (:.*)$/i)) {
-      .parseline -iqptu0 $regml(1) PRIVMSG $me $regml(2)
+      .parseline -iqpt $regml(1) PRIVMSG $me $regml(2)
     }
     elseif ($regex($1-, /^:?(?:[^\.!@]*\.)?(?:tmi|irc)\.twitch\.tv /i)) {
-      .parseline -iqptu0 $iif(:* iswm $1, :tmi.twitch.tv, tmi.twitch.tv) $2-
+      .parseline -iqpt $iif(:* iswm $1, :tmi.twitch.tv, tmi.twitch.tv) $2-
     }
     else {
-      .parseline -iqptu0 $1-
+      .parseline -iqpt $1-
     }
   }
 }
