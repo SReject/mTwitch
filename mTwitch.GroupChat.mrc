@@ -1,5 +1,5 @@
 alias mTwitch.has.GroupChat {
-  return 0000.0000.0008
+  return 0000.0000.0009
 }
 
 alias -l mTwitch.GroupChat.Parse {
@@ -9,11 +9,11 @@ alias -l mTwitch.GroupChat.Parse {
   }
   else {
     if (!$hget(%sock, loggedIn)) {
-      if ($regex($1-, /^:(?:tmi|irc)\.twitch\.tv (\d\d\d) \S+ :\S*$/i)) {
+      if ($regex($1-, /^:(?:tmi|irc)\.(?:chat\.)?twitch\.tv (\d\d\d) \S+ :\S*$/i)) {
         hadd -m $sockname loggedIn $true
       }
       else {
-        if ($regex($1-, /^:(?:tmi|irc)\.twitch\.tv NOTICE \S+ :Error logging in$/)) {
+        if ($regex($1-, /^:(?:tmi|irc)\.(?:chat\.)?twitch\.tv NOTICE \S+ :Error logging in$/)) {
           mTwitch.GroupChat.Cleanup $sockname
           echo $color(info) -a [mTwitch->GroupChat] Invalid oauth token; stopping Twitch Group-Chat connection attempts.
           halt
@@ -21,10 +21,10 @@ alias -l mTwitch.GroupChat.Parse {
         return
       }
     }
-    if ($regex($1-, /^:(?:[^\.!@]*\.)?(?:tmi|irc)\.twitch\.tv CAP /i)) {
+    if ($regex($1-, /^:(?:[^\.!@]*\.)?(?:tmi|irc)\.(?:chat\.)?twitch\.tv CAP /i)) {
       return
     }
-    elseif ($regex($1-, /^:(?:[^\.!@]*\.)?(?:tmi|irc)\.twitch\.tv (\d\d\d) /i)) {
+    elseif ($regex($1-, /^:(?:[^\.!@]*\.)?(?:tmi|irc)\.(?:chat\.)?twitch\.tv (\d\d\d) /i)) {
       var %tok = $regml(1)
       if (%tok isnum 1-5 || %tok == 372 || %tok == 375 || %tok == 376) {
         return
@@ -34,7 +34,7 @@ alias -l mTwitch.GroupChat.Parse {
     elseif ($regex($1-, /^(@\S+ [^!@\s]+![^@\s]+@\S+) WHISPER \S+ (:.*)$/i)) {
       .parseline -iqpt $regml(1) PRIVMSG $me $regml(2)
     }
-    elseif ($regex($1-, /^:?(?:[^\.!@]*\.)?(?:tmi|irc)\.twitch\.tv /i)) {
+    elseif ($regex($1-, /^:?(?:[^\.!@]*\.)?(?:tmi|irc)\.(?:chat\.)?twitch\.tv /i)) {
       .parseline -iqpt $iif(:* iswm $1, :tmi.twitch.tv, tmi.twitch.tv) $2-
     }
     else {
@@ -46,8 +46,13 @@ alias -l mTwitch.GroupChat.Parse {
 alias -l mTwitch.GroupChat.Connect {
   var %sock = mTwitch.GroupChat. $+ $1
   mTwitch.GroupChat.Cleanup %sock
-  sockopen %sock $$hfind(mTwitch.isServer.list, group, 1, w).data 443
-  sockmark %sock $1-
+  if ($hfind(mTwitch.isServer.list, group, 1, 2).data) {
+    sockopen %sock $v1 443
+    sockmark %sock $1-
+  }
+  else {
+    echo $color(info) -s [mTwitch->GroupChat] Unable to locate a valid group chat server
+  }
 }
 
 alias -l mTwitch.GroupChat.Buffer {
