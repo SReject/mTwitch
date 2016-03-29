@@ -18,7 +18,7 @@ alias mTwitch.isServer {
       if (!$0) {
         return $false
       }
-      if (!$prop) && ($network === twitch.tv || $1- == tmi.twitch.tv || $1- == irc.twitch.tv) {
+      if (!$prop) && ($network === twitch.tv || $1- == tmi.twitch.tv || $1- == irc.twitch.tv || $1- == irc.chat.twitch.tv) {
         return $true
       }
       elseif ($prop == isGroup && $network == groupchat.twitch.tv) {
