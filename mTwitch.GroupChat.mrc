@@ -1,5 +1,5 @@
 alias mTwitch.has.GroupChat {
-  return 0000.0000.0014
+  return 0000.0000.0015
 }
 
 alias -l mTwitch.GroupChat.Parse {
