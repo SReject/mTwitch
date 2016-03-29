@@ -1,5 +1,5 @@
 alias mTwitch.has.GroupChat {
-  return 0000.0000.0011
+  return 0000.0000.0012
 }
 
 alias -l mTwitch.GroupChat.Parse {
@@ -118,7 +118,6 @@ on *:DISCONNECT:{
 }
 
 on *:SOCKOPEN:mTwitch.GroupChat.*:{
-  mTwitch.Debug -i GroupChat~Connection established to $sock($sockname).addr
   tokenize 32 $sock($sockname).mark
   if ($0 !== 3) {
     mTwitch.Debug -e GroupChat~State lost; cleaning up
@@ -132,7 +131,7 @@ on *:SOCKOPEN:mTwitch.GroupChat.*:{
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
   else {
-    mTwitch.Debug -i2 GroupChat Open~Registering with twitch
+    mTwitch.Debug -i2 GroupChat~Connection to $sock($sockname).addr $+ : $+ $sock($sockname).port established; Sending nick and oauth
     mTwitch.GroupChat.Buffer $sockname PASS $3
     mTwitch.GroupChat.Buffer $sockname NICK $2
     mTwitch.GroupChat.Buffer $sockname USER $2 ? * :Twitch User
