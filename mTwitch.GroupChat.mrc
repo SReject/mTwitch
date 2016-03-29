@@ -1,5 +1,5 @@
 alias mTwitch.has.GroupChat {
-  return 0000.0000.0013
+  return 0000.0000.0014
 }
 
 alias -l mTwitch.GroupChat.Parse {
@@ -112,9 +112,10 @@ on *:START:{
 }
 
 on $*:PARSELINE:out:/^PASS (oauth\x3A[a-zA-Z\d]{30,32})$/:{
+  var %oauth = $regml(1)
   if ($mTwitch.isServer && !$mTwitch.isServer().isGroup) {
     mTwitch.Debug -i GroupChat~Captured twitch connection attempt; attempting to connect to group-chat servers
-    mTwitch.GroupChat.Connect $cid $me $regml(1)
+    mTwitch.GroupChat.Connect $cid $me %oauth
   }
 }
 
