@@ -1,5 +1,5 @@
 alias mTwitch.has.GroupChat {
-  return 0000.0000.0012
+  return 0000.0000.0013
 }
 
 alias -l mTwitch.GroupChat.Parse {
@@ -49,29 +49,46 @@ alias -l mTwitch.GroupChat.Connect {
   mTwitch.GroupChat.Cleanup %sock
   if ($hfind(mTwitch.isServer.list, group, 1, 2).data) {
     %serv = $v1
-    mTwitch.Debug -i GroupChat Connect~Connection to %serv on port 443
+    mTwitch.Debug -i GroupChat Connect~Attempting to connect to %serv on port 443
     sockopen %sock %serv 443
     sockmark %sock $1-
   }
   else {
+    mTwitch.Debug -e GroupChat Connect~Unable to locate a valid group-chat server
     echo $color(info) -s [mTwitch->GroupChat] Unable to locate a valid group chat server
   }
 }
 
 alias -l mTwitch.GroupChat.Buffer {
-  if ($0 < 2 || !$sock($1)) { 
-    return 
-  }
-  elseif (!$sock($1).sq) {
-    sockwrite -n $1-
+  if (!$sock($1)) {
+    return
   }
   else {
-    bunset &queue
+    var %hsize, %space, %size
     bunset &buffer
-    bset -t &queue 1 $2- $+ $crlf
-    noop $hget($1, sendbuffer, &buffer)
-    bcopy -c &buffer $calc($bvar(&buffer, 0) +1) &queue 1 -1
-    hadd -mb $1 sendbuffer &buffer
+    %hsize = $hget($1, sendbuffer, &buffer)
+    if ($0 > 1) {
+      mTwitch.Debug -i GroupChat Buffer~Adding to sendbuffer: $2-
+      bset -t &buffer $calc($bvar(&buffer,0) +1) $2- $+ $crlf
+    }
+    if ($bvar(&buffer, 0) && $calc(16384 - $sock($1).sq) > 0) {
+      %space = $v1
+      %size = $bvar(&buffer, 0)
+      if (%space >= %size) {
+        sockwrite $1 &buffer
+        if (%hsize) {
+          hdel $1 sendbuffer
+        }
+      }
+      else {
+        sockwrite -b $1 %space &buffer
+        bcopy -c &buffer 1 &buffer $calc(%space +1) -1
+        hadd -mb $1 sendbuffer &buffer
+      }
+    }
+    elseif (!$sock($1).sq && !$bvar(&buffer, 0)) {
+      mTwitch.debug -i2 GroupChat Buffer~All data sent.
+    }
   }
 }
 
@@ -151,17 +168,8 @@ on *:SOCKWRITE:mTwitch.GroupChat.*:{
     mTwitch.GroupChat.Cleanup $sockname
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
-  elseif ($hget($sockname, sendbuffer, &buffer) && $calc(16384 - $sock($sockname).sq) > 0) {
-    var %bytes = $v1
-    if (%bytes >= $bvar(&buffer, 0)) {
-      sockwrite $sockname &buffer
-      hdel $sockname sendbuffer
-    }
-    else {
-      sockwrite %bytes $sockname &buffer
-      bcopy -c &buffer 1 &buffer $calc(%bytes + 1) -1
-      hadd -mb $sockname sendbuffer &buffer
-    }
+  else {
+    mTwitch.GroupChat.Buffer $sockname
   }
 }
 
