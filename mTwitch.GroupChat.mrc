@@ -3,6 +3,7 @@ alias mTwitch.has.GroupChat {
 }
 
 alias -l mTwitch.GroupChat.Parse {
+  mTwitch.Debug -i GroupChat Parsing~ $+ $1-
   var %sock = $sockname
   if ($regex($1-, /^PING (:.*)$/)) {
     mTwitch.GroupChat.Buffer %sock PONG $regml(1)
@@ -47,6 +48,7 @@ alias -l mTwitch.GroupChat.Connect {
   var %sock = mTwitch.GroupChat. $+ $1
   mTwitch.GroupChat.Cleanup %sock
   if ($hfind(mTwitch.isServer.list, group, 1, 2).data) {
+    mTwitch.Debug -i GroupChat Connect~Connection to $v1 on port 443
     sockopen %sock $v1 443
     sockmark %sock $1-
   }
@@ -93,6 +95,8 @@ on *:START:{
 
 on $*:PARSELINE:out:/^PASS (oauth\x3A[a-zA-Z\d]{30,32})$/:{
   if ($mTwitch.isServer && !$mTwitch.isServer().isGroup) {
+    mTwitch.Debug -i GroupChat~Captured twitch connection attempt; attempting to connect to group-chat servers
+  
     mTwitch.GroupChat.Connect $cid $me $regml(1)
   }
 }
@@ -108,13 +112,16 @@ on $*:PARSELINE:out:/^PRIVMSG (?!=jtv|#)(\S+) :(.*)$/i:{
 
 on *:DISCONNECT:{
   if ($mTwitch.isServer && $sock(mTwitch.GroupChat. $+ $cid)) {
+    mTwitch.Debug -i2 GroupChat~Disconnected from twitch's chat interface; disconnecting from groupchat server
     mTwitch.GroupChat.Cleanup mTwitch.GroupChat.Connection $+ $cid
   }
 }
 
 on *:SOCKOPEN:mTwitch.GroupChat.*:{
+  mTwitch.Debug -i GroupChat~Connection established to $sock($sockname).addr
   tokenize 32 $sock($sockname).mark
   if ($0 !== 3) {
+    mTwitch.Debug -e GroupChat~State lost; cleaning up
     mTwitch.GroupChat.Cleanup $sockname
   }
   elseif ($sockerr) {
@@ -124,6 +131,7 @@ on *:SOCKOPEN:mTwitch.GroupChat.*:{
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
   else {
+    mTwitch.Debug -i2 GroupChat~Registering with twitch
     mTwitch.GroupChat.Buffer $sockname PASS $3
     mTwitch.GroupChat.Buffer $sockname NICK $2
     mTwitch.GroupChat.Buffer $sockname USER $2 ? * :Twitch User
