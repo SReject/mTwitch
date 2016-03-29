@@ -1,5 +1,5 @@
 alias mTwitch.has.GroupChat {
-  return 0000.0000.0009
+  return 0000.0000.0011
 }
 
 alias -l mTwitch.GroupChat.Parse {
@@ -45,11 +45,12 @@ alias -l mTwitch.GroupChat.Parse {
 }
 
 alias -l mTwitch.GroupChat.Connect {
-  var %sock = mTwitch.GroupChat. $+ $1
+  var %sock = mTwitch.GroupChat. $+ $1, %serv
   mTwitch.GroupChat.Cleanup %sock
   if ($hfind(mTwitch.isServer.list, group, 1, 2).data) {
-    mTwitch.Debug -i GroupChat Connect~Connection to $v1 on port 443
-    sockopen %sock $v1 443
+    %serv = $v1
+    mTwitch.Debug -i GroupChat Connect~Connection to %serv on port 443
+    sockopen %sock %serv 443
     sockmark %sock $1-
   }
   else {
@@ -96,7 +97,6 @@ on *:START:{
 on $*:PARSELINE:out:/^PASS (oauth\x3A[a-zA-Z\d]{30,32})$/:{
   if ($mTwitch.isServer && !$mTwitch.isServer().isGroup) {
     mTwitch.Debug -i GroupChat~Captured twitch connection attempt; attempting to connect to group-chat servers
-  
     mTwitch.GroupChat.Connect $cid $me $regml(1)
   }
 }
@@ -127,11 +127,12 @@ on *:SOCKOPEN:mTwitch.GroupChat.*:{
   elseif ($sockerr) {
     scid $1
     echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed to open; retrying...
+    mTwitch.Debug -w GroupChat Open~Connection to Twitch group-chat server failed to open; retrying...
     mTwitch.GroupChat.Cleanup %sock
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
   else {
-    mTwitch.Debug -i2 GroupChat~Registering with twitch
+    mTwitch.Debug -i2 GroupChat Open~Registering with twitch
     mTwitch.GroupChat.Buffer $sockname PASS $3
     mTwitch.GroupChat.Buffer $sockname NICK $2
     mTwitch.GroupChat.Buffer $sockname USER $2 ? * :Twitch User
@@ -147,6 +148,7 @@ on *:SOCKWRITE:mTwitch.GroupChat.*:{
   elseif ($sockerr) {
     scid $1
     echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed; attempting to reconnect...
+    mTwitch.Debug -e GroupChat Write~Connection to Twitch Group-Chat server failed; attempting to reconnect...
     mTwitch.GroupChat.Cleanup $sockname
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
@@ -172,6 +174,7 @@ on *:SOCKREAD:mTwitch.GroupChat.*:{
   elseif ($sockerr) {
     scid $1
     echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server failed; attempting to reconnect...
+    mTwitch.Debug -e GroupChat Read~Connection to Twitch Group-Chat server failed; attempting to reconnect...
     mTwitch.GroupChat.Cleanup $sockname
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
@@ -195,6 +198,7 @@ on *:SOCKCLOSE:mTwitch.GroupChat.*:{
     scid $1
     mTwitch.GroupChat.Cleanup $sockname
     echo $color(info) -s [mTwitch->GroupChat] Connection to Twitch Group-Chat server lost; attempting to reconnect...
+    mTwitch.Debug -e GroupChat Close~Connection to Twitch Group-Chat server failed; attempting to reconnect...
     .timer 1 0 mTwitch.GroupChat.Connect $1-
   }
 }
