@@ -68,7 +68,6 @@ alias mTwitch.ConvertTime {
   mTwitch.Debug -i $!mTwitch.ConvertTime~Called with parameters: $*
   if ($regex($1-, /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z$/)) {
     var %time = $asctime($calc($ctime($+($gettok(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec, $regml(2), 32) $ord($base($regml(3), 10, 10)), $chr(44) $regml(1) $regml(4), :, $regml(5), :, $regml(6))) + ( $time(z) * 3600)), mmm dd @ HH:nn:ss)
-    
     mTwitch.Debug -s $!mTwitch.ConvertTime~Returning time as: %time
     return %time
   }
@@ -379,3 +378,12 @@ menu @mTwitchDebug {
   Close: mTwitchDebug off | close -@ @mTwitchDebug
 }
 
+on $*:PARSELINE:in:/^((@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i:{
+  var %count  = $regml(0)
+  if ($regml($calc(%count -1)) == $me) {
+    .parseline -it $regml($calc(%Count -3)) $regml($calc(%count -2)) PRIVMSG $Me $regml(%Count)
+  }
+}
+on $*:PARSELINE:out:/^PRIVMSG ([^#]\S*) \x3A(.+)$/i:{
+  .parseline -otn PRIVMSG jtv :/w $regml(1) $regml(2)
+}
