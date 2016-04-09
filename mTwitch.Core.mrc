@@ -265,7 +265,7 @@ on $*:PARSELINE:out:/^JOIN #?(\S+)$/i:{
 raw 004:*:{
   if ($mTwitch.isServer) {
     .parseline -iqpt :tmi.twitch.tv 005 $me NETWORK= $+ $iif($mTwitch.isServer().isGroup, groupchat.,) $+ twitch.tv :are supported by this server
-  } 
+  }
 }
 
 raw *:*:{
@@ -379,11 +379,14 @@ menu @mTwitchDebug {
 }
 
 on $*:PARSELINE:in:/^((@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i:{
-  var %count  = $regml(0)
-  if ($regml($calc(%count -1)) == $me) {
-    .parseline -it $regml($calc(%Count -3)) $regml($calc(%count -2)) PRIVMSG $Me $regml(%Count)
+  var %Count = $regml(0), %Tags = $regml($calc(%Count -3)), %User = $regml($calc(%Count -2)), %Target = $regml($calc(%Count -1)), %Msg = $regml(%Count)
+  if ($mTwitch.IsServer && $me == %Target) {
+    .parseline -it %Tags %User PRIVMSG $me %Msg
   }
 }
 on $*:PARSELINE:out:/^PRIVMSG ([^#]\S*) \x3A(.+)$/i:{
-  .parseline -otn PRIVMSG jtv :/w $regml(1) $regml(2)
+  var %Target = $regml(1), %Msg = $regml(2)
+  if ($mTwitch.IsServer) {
+    .parseline -otn PRIVMSG jtv :/w %Target %Msg
+  }
 }
