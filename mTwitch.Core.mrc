@@ -1,5 +1,5 @@
 alias mTwitch.has.core {
-  return 0000.0000.0010
+  return 0000.0000.0011
 }
 
 alias mTwitch.isServer {
