@@ -1,5 +1,5 @@
 alias mTwitch.has.core {
-  return 0000.0000.0012
+  return 0000.0000.0013
 }
 
 alias mTwitch.isServer {
@@ -129,14 +129,6 @@ alias mTwitch.UrlEncode {
   return $regsubex($1, /(\W| )/g, % $+ $base($asc(\1), 10, 16, 2))
 }
 
-alias mTwitch.MsgTags {
-  var %tok = $wildtok($iif(@* iswm $1, $mid($1, 2-), $1), $2 $+ =*, $iif($0 > 2, $3, 1), 59)
-  if ($0 > 2 && $3 == 0) {
-    return %tok
-  }
-  return $regsubex($mTwitch.MsgTags.Unescape($gettok(%tok, 2, 61)), /\\(.)/g, $_xmsgtags(\t))
-}
-
 alias -l mTwitch.IsServer.UpdateList {
   mTwitch.Debug -i $!mTwitch.isServer.UpdateList~Called with parameters: $*
   if (!$isid && $JSONVersion) {
@@ -208,15 +200,6 @@ alias -l mTwitch.StreamState.Cleanup {
   }
 }
 
-alias -l mTwitch.MsgTags.Unescape {
-  if ($1 == s) returnex $chr(32)
-  if ($1 == r) return $cr
-  if ($1 == l) return $lf
-  if ($1 == :) return ;
-  if ($1 == \) return
-  return $1
-}
-
 on *:START:{
   if (!$JSONVersion) {
     echo $color(info2) -a [mTwitch->Core] This script depends on SReject's JSON parser to be loaded
@@ -236,9 +219,10 @@ on *:UNLOAD:{
 }
 
 on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* LS (\x3A.*)$/:{
+  var %req = $regml(2)
   if ($mTwitch.isServer) {
     set -e $+(%,$cid,mTwitch.CapAcceptHalt) $true
-    .raw CAP REQ $regml(2)
+    .raw CAP REQ %req
   }
 }
 
@@ -250,8 +234,8 @@ on $*:PARSELINE:out:/^CAP END$/:{
 
 on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* ACK \x3A/:{
   if ($mTwitch.isServer && $($+(%, $cid, mTwitch.CapAcceptHalt), 2)) {
-    .raw CAP END
     unset $+(%, $cid, mTwitch.CapAcceptHalt)
+    .raw CAP END
   }
 }
 
@@ -259,6 +243,21 @@ on $*:PARSELINE:out:/^JOIN #?(\S+)$/i:{
   if ($lower($regml(1)) !=== $regml(1)) {
     join $chr(35) $+ $v1
     .parseline -otn
+  }
+}
+
+on $*:PARSELINE:in:/^((@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i:{
+  var %Count = $regml(0), %Tags = $regml($calc(%Count -3)), %User = $regml($calc(%Count -2)), %Target = $regml($calc(%Count -1)), %Msg = $regml(%Count)
+  if ($mTwitch.IsServer && $me == %Target) {
+    .parseline -it
+    .parseline -itqp %Tags %User PRIVMSG $me %Msg
+  }
+}
+
+on $*:PARSELINE:out:/^PRIVMSG ([^#]\S*) \x3A(.+)$/i:{
+  var %Target = $regml(1), %Msg = $regml(2)
+  if ($mTwitch.IsServer) {
+    .parseline -otn PRIVMSG jtv :/w %Target %Msg
   }
 }
 
@@ -376,18 +375,4 @@ menu @mTwitchDebug {
   Clear: clear @mTwitchDebug
   -
   Close: mTwitchDebug off | close -@ @mTwitchDebug
-}
-
-on $*:PARSELINE:in:/^((@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i:{
-  var %Count = $regml(0), %Tags = $regml($calc(%Count -3)), %User = $regml($calc(%Count -2)), %Target = $regml($calc(%Count -1)), %Msg = $regml(%Count)
-  if ($mTwitch.IsServer && $me == %Target) {
-    .parseline -it
-    .parseline -itqp %Tags %User PRIVMSG $me %Msg
-  }
-}
-on $*:PARSELINE:out:/^PRIVMSG ([^#]\S*) \x3A(.+)$/i:{
-  var %Target = $regml(1), %Msg = $regml(2)
-  if ($mTwitch.IsServer) {
-    .parseline -otn PRIVMSG jtv :/w %Target %Msg
-  }
 }
