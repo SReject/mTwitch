@@ -1,6 +1,7 @@
 alias mTwitch.has.DisplayName {
-  return 0000.0000.0004
+  return 0000.0000.0005
 }
+
 on *:CONNECT:{
   if ($mTwitch.isServer) {
     JSONOpen -u mTwitch_NameFix https://api.twitch.tv/kraken/users/ $+ $mTwitch.UrlEncode($me)
