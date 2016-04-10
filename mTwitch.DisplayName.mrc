@@ -1,5 +1,5 @@
 alias mTwitch.has.DisplayName {
-  return 0000.0000.0003
+  return 0000.0000.0004
 }
 on *:CONNECT:{
   if ($mTwitch.isServer) {
@@ -14,13 +14,10 @@ on *:CONNECT:{
   }
 }
 
-on $*:PARSELINE:in:/^(@\S+) \x3A([^!@\s]+)(![^@\s]+@\S+ PRIVMSG \x23\S+ \x3A.*)$/:{
+on $*:PARSELINE:in:/^(@\S+) \x3A([^!@\s]+)(![^@\s]+@\S+ PRIVMSG \x23?\S+ \x3A.*)$/:{
+  var %tags = $regml(1), %nick = $regml(2), %param = $regml(3), %dnick
   if ($mTwitch.isServer) {
-    tokenize 32 $parseline
-    var %tags = $regml(1)
-    var %nick = $regml(2)
-    var %param = $regml(3)
-    var %dnick = $remove($mTwitch.MsgTags(%tags, display-name), $chr(32), $cr, $lf)
+    %dnick = $remove($mTwitch.MsgTags(%tags, display-name), $chr(32), $cr, $lf)
     if ($len(%dnick) && %dnick !=== %nick) {
       .parseline -it %tags $+(:, %dnick, %param)
     }

@@ -1,5 +1,5 @@
 alias mTwitch.has.core {
-  return 0000.0000.0011
+  return 0000.0000.0012
 }
 
 alias mTwitch.isServer {
@@ -381,7 +381,8 @@ menu @mTwitchDebug {
 on $*:PARSELINE:in:/^((@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i:{
   var %Count = $regml(0), %Tags = $regml($calc(%Count -3)), %User = $regml($calc(%Count -2)), %Target = $regml($calc(%Count -1)), %Msg = $regml(%Count)
   if ($mTwitch.IsServer && $me == %Target) {
-    .parseline -it %Tags %User PRIVMSG $me %Msg
+    .parseline -it
+    .parseline -itqp %Tags %User PRIVMSG $me %Msg
   }
 }
 on $*:PARSELINE:out:/^PRIVMSG ([^#]\S*) \x3A(.+)$/i:{
