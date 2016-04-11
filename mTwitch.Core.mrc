@@ -1,5 +1,5 @@
 alias mTwitch.has.core {
-  return 0000.0000.0013
+  return 0000.0000.0014
 }
 
 alias mTwitch.isServer {
@@ -123,6 +123,22 @@ alias mTwitch.Storage.Del {
     hsave mTwitch $qt($scriptdirmTwitch.dat)
     return $true
   }
+}
+
+alias mTwitch.xtags {
+  if ($0 > 1) {
+    var %tag = $gettok($wildtok($iif(@* iswm $1, $mid($1, 2-), $1), $2 $+ =*, $iif($0 == 2, 1, $3), 59), 2-, 61)
+    if ($len(%tag)) {
+      return $regsubex(%tag, /\\(.)/g, $mTwitch.xTagsFix(\1))
+    }
+  }
+}
+alias -l mTwitch.xTagsFix {
+  if ($1 == :) return $chr(59)
+  if ($1 == r) return $cr
+  if ($1 == n) return $lf
+  if ($1 == s) returnx $chr(32)
+  return $1
 }
 
 alias mTwitch.UrlEncode {
