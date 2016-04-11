@@ -257,7 +257,7 @@ on $*:PARSELINE:in:/^((@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i
 on $*:PARSELINE:out:/^PRIVMSG ([^#]\S*) \x3A(.+)$/i:{
   var %Target = $regml(1), %Msg = $regml(2)
   if ($mTwitch.IsServer) {
-    .parseline -otn PRIVMSG jtv :/w %Target %Msg
+    .parseline -otn PRIVMSG jtv :/w $lower(%Target) %Msg
   }
 }
 
