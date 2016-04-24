@@ -1,5 +1,5 @@
 alias mTwitch.has.core {
-  return 0000.0000.0014
+  return 0000.0000.0015
 }
 
 alias mTwitch.isServer {
@@ -137,7 +137,7 @@ alias -l mTwitch.xTagsFix {
   if ($1 == :) return $chr(59)
   if ($1 == r) return $cr
   if ($1 == n) return $lf
-  if ($1 == s) returnx $chr(32)
+  if ($1 == s) returnex $chr(32)
   return $1
 }
 
