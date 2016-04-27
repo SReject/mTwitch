@@ -1,5 +1,5 @@
 alias mTwitch.has.DisplayName {
-  return 0000.0000.0006
+  return 0000.0000.0007
 }
 
 on *:CONNECT:{
