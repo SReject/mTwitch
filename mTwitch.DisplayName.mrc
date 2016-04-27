@@ -18,8 +18,9 @@ on *:CONNECT:{
 on $*:PARSELINE:in:/^(@\S+) \x3A([^!@\s]+)(![^@\s]+@\S+ PRIVMSG \x23?\S+ \x3A.*)$/:{
   var %tags = $regml(1), %nick = $regml(2), %param = $regml(3), %dnick
   if ($mTwitch.isServer) {
-    %dnick = $remove($mTwitch.xtags($regml(1), display-name), $chr(32), $cr, $lf)
+    %dnick = $remove($mTwitch.xtags(%tags, display-name), $chr(32), $cr, $lf)
     if ($len(%dnick) && %dnick !=== %nick) {
+      %tags = %tags $+ $chr(59) $+ user-name= $+ $nick
       .parseline -it %tags $+(:, %dnick, %param)
     }
   }
