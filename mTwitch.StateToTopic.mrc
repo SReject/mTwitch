@@ -1,5 +1,5 @@
 alias mTwitch.has.StateToTopic {
-  0000.0000.0009
+  return 0000.0000.0010
 }
 
 alias mTwitch.StateToTopic {
