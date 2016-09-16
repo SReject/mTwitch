@@ -1,13 +1,15 @@
 alias mTwitch.has.DisplayName {
-  return 0000.0000.0007
+  return 0000.0000.0008
 }
 
 on *:CONNECT:{
   if ($mTwitch.isServer) {
-    JSONOpen -u mTwitch_NameFix https://api.twitch.tv/kraken/users/ $+ $mTwitch.UrlEncode($me)
+    JSONOpen -uw mTwitch_NameFix https://api.twitch.tv/kraken/users/ $+ $mTwitch.UrlEncode($me)
+    JSONUrlHeader mTwitch_NameFix Client-ID e8e68mu4x2sxsewuw6w82wpfuyprrdx
+    JSONUrlGet mTwitch_NameFix
     if (!$JSONError) {
       var %dnick = $remove($JSON(mTwitch_NameFix, display_name), $chr(32), $cr, $lf)
-      if (%dnick !=== $me) {
+      if ($len(%dnick) && %dnick !=== $me) {
         .parseline -iqt $+(:, $me, !, $me, @, $me, .tmi.twitch.tv) NICK $+(:, %dnick)
       }
     }
