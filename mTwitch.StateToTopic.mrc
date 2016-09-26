@@ -24,7 +24,9 @@ alias mTwitch.StateToTopic {
     while ($hget(mTwitch.StateToTopic.Streams, %x).item) {
       %streams = $addtok(%streams, $mid($v1, 2-), 44)
       if (!$calc($numtok(%streams, 44) % 10) || (%streams && %x == $hget(mTwitch.StateToTopic.Streams, 0).item)) {
-        JSONOpen -u mTwitch.StateToTopic https://api.twitch.tv/kraken/streams?channel= $+ %streams
+        JSONOpen -uw mTwitch.StateToTopic https://api.twitch.tv/kraken/streams?channel= $+ %streams
+        JSONUrlHeader mTwitch.StateToTopic Client-ID e8e68mu4x2sxsewuw6w82wpfuyprrdx
+        JSONUrlGet mTwitch.StateToTopic
         if (!$JSONError) {
           %len = $JSON(mTwitch.StateToTopic, streams, length)
           %y = 0
