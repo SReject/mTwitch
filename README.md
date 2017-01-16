@@ -11,7 +11,7 @@ SReject © 2016; All rights reserved.
 # Requirements and Dependencies
 * mIRC v7.43
 * Windows XP+: Due to a dependency in the JSON parser these scripts will not work under WINE
-* [JSONForMirc.mrc](https://raw.githubusercontent.com/SReject/mTwitch/master/resources/JSONForMirc.mrc): Many of scripts take advantage of twitch's webapi including mTwitch.Core.mrc
+* [JSONForMirc.mrc](https://github.com/SReject/JSON-For-Mirc/releases): Many of scripts take advantage of twitch's webapi including mTwitch.Core.mrc
 * mTwitch.core.mrc is required by all other scripts in the repo
 
 # Installation
