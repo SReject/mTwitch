@@ -1,7 +1,7 @@
 # mTwitch
 mTwitch is a modulizer set of scripts for mIRC to help conform twitch more closely to the IRC standard and to make twitch more accessible from within the mIRC enviornment. More information about what each module does can be found on the **[wiki](https://github.com/SReject/mTwitch/wiki)**. 
 
-If you appreciate the work done, consider donating via paypal: froggiedafrog@aim.com  
+If you appreciate the work done, consider donating via [StreamJar](https://streamjar.tv/tip/SReject)
 
 # Rights and Distributing
 You may do with the code as you wish so long as you do not redistrubute any files contained with in this repository, in part or whole, without direct permission from me. You may directly link to any asset within this repository so long as you also include a link to the top level of the repository.  
