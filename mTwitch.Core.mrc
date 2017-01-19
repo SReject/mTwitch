@@ -273,7 +273,7 @@ on *:UNLOAD:{
 
 ;; Returns the core versioning
 alias mTwitch.has.core {
-  return 0000.0000.0016
+  return 0000.0000.0017
 }
 
 
