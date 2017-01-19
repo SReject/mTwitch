@@ -118,14 +118,13 @@ on $*:PARSELINE:in:/^(\x3A[^\s!@]+![^\s@]+@\S+) JOIN ([^#]\S*)$/i:{
 
 
 ;; Transforms inbound twitch whispers into private message queries
-on $*:PARSELINE:in:/^((@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i:{
-  var %Count  = $regml(0)
-  var %Tags   = $regml($calc(%Count -3))
-  var %User   = $regml($calc(%Count -2))
-  var %Target = $regml($calc(%Count -1))
-  var %Msg    = $regml(%Count)
+on $*:PARSELINE:in:/^((?:@\S+ )?)(\x3A[^!@ ]+![^@ ]+@\S+) WHISPER (\S+) (\x3A.*)/i:{
+  var %Tags   = $regml(1)
+  var %User   = $regml(2)
+  var %Target = $regml(3)
+  var %Msg    = $regml(4)
   if ($mTwitch.IsServer && $me == %Target) {
-    .parseline -itp %Tags $+ %User PRIVMSG $me %Msg
+    .parseline -itp %Tags %User PRIVMSG $me %Msg
   }
 }
 
