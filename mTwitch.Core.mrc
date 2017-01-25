@@ -311,7 +311,7 @@ alias mTwitch.AmOn {
         scon -r
         return $true
       }
-      inc %x
+      dec %x
     }
     scon -r
   }
@@ -324,7 +324,6 @@ alias mTwitch.AmOn {
 ;;
 ;; if .dur is specified, the number of seconds since the input date is returned
 alias mTwitch.ConvertTime {
-  mTwitch.Debug -i $!mTwitch.ConvertTime~Called with parameters: $*
   if ($regex($1-, /^(\d\d(?:\d\d)?)-(\d\d)-(\d\d)T(\d\d)\:(\d\d)\:(\d\d)(?:(?:Z$)|(?:([+-])(\d\d)\:(\d+)))?$/i)) {
     var %month = $gettok(January February March April May June July August September October November December, $regml(2), 32)
     var %day = $ord($base($regml(3),10,10))
