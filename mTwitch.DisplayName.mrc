@@ -8,7 +8,7 @@ on *:CONNECT:{
     JSONHttpHeader mTwitch_NameFix Accept application/vnd.twitchtv.v5+json
     JSONHttpFetch mTwitch_NameFix
     if (!$JSONError) {
-      var %dnick = $remove($JSON(mTwitch_NameFix, display_name).value, $chr(32), $cr, $lf)
+      var %dnick = $remove($JSON(mTwitch_NameFix, users, 0, display_name).value, $chr(32), $cr, $lf)
       if (%dnick !== $null && %dnick !=== $me) {
         .parseline -iqt $+(:, $me, !, $me, @, $me, .tmi.twitch.tv) NICK $+(:, %dnick)
       }
