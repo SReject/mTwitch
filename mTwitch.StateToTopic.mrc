@@ -110,7 +110,7 @@ alias -l mTwitch.StateToTopic.Set {
       %State = Offline
       hadd -m %Table %item $+ .StreamOnline $false
     }
-    %State = $iif($hget(%table, %Item $+ .StreamOnline) , Online, Offline)
+    %State   = $iif($hget(%table, %Item $+ .StreamOnline) , Online, Offline)
     %Start   = $hget(%Table, %Item $+ .StreamStart)
     %Game    = $hget(%Table, %Item $+ .StreamGame)
     %Title   = $hget(%Table, %Item $+ .StreamTitle)

@@ -3,12 +3,13 @@ alias mTwitch.has.DisplayName {
 }
 on *:CONNECT:{
   if ($mTwitch.isServer) {
-    JSONOpen -uw mTwitch_NameFix https://api.twitch.tv/kraken/users/ $+ $mTwitch.UrlEncode($me)
+    JSONOpen -uw mTwitch_NameFix https://api.twitch.tv/kraken/users?login= $+ $mTwitch.UrlEncode($me)
     JSONHttpHeader mTwitch_NameFix Client-ID e8e68mu4x2sxsewuw6w82wpfuyprrdx
+    JSONHttpHeader mTwitch_NameFix Accept application/vnd.twitchtv.v5+json
     JSONHttpFetch mTwitch_NameFix
     if (!$JSONError) {
       var %dnick = $remove($JSON(mTwitch_NameFix, display_name).value, $chr(32), $cr, $lf)
-      if ($len(%dnick) && %dnick !=== $me) {
+      if (%dnick !== $null && %dnick !=== $me) {
         .parseline -iqt $+(:, $me, !, $me, @, $me, .tmi.twitch.tv) NICK $+(:, %dnick)
       }
     }
@@ -19,7 +20,7 @@ on $*:PARSELINE:in:/^(@\S+) \x3A([^!@\s]+)(![^@\s]+@\S+ PRIVMSG \x23?\S+ \x3A.*)
   var %tags = $regml(1), %nick = $regml(2), %param = $regml(3), %dnick
   if ($mTwitch.isServer) {
     %dnick = $remove($mTwitch.MsgTags(%tags, display-name), $chr(32), $cr, $lf)
-    if ($len(%dnick) && %dnick !=== %nick) {
+    if (%dnick !== $null && %dnick !=== %nick) {
       %tags = %tags $+ $chr(59) $+ user-name= $+ $nick
       .parseline -it %tags $+(:, %dnick, %param)
     }

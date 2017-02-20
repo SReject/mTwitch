@@ -324,15 +324,15 @@ alias mTwitch.AmOn {
 ;;
 ;; if .dur is specified, the number of seconds since the input date is returned
 alias mTwitch.ConvertTime {
-  if ($regex($1-, /^(\d\d(?:\d\d)?)-(\d\d)-(\d\d)T(\d\d)\:(\d\d)\:(\d\d)(?:(?:Z$)|(?:([+-])(\d\d)\:(\d+)))?$/i)) {
+  if ($regex($1-, /^(\d\d(?:\d\d)?)-(\d\d)-(\d\d)T(\d\d)\:(\d\d)\:(\d\d(?:.\d+)?)(?:(?:Z$)|(?:([+-])(\d\d)\:(\d+)))?$/i)) {
     var %month = $gettok(January February March April May June July August September October November December, $regml(2), 32)
-    var %day = $ord($base($regml(3),10,10))
+    var %day = $ord($base($regml(3), 10, 10))
     var %offset = +0
     var %time
     if ($regml(0) > 6) {
       %offset = $regml(7) $+ $calc($regml(8) * 3600 + $regml(9))
     }
-    %time = $calc($ctime(%month %day $regml(1) $regml(4) $+ : $+ $regml(5) $+ : $+ $regml(6)) - %offset)
+    %time = $calc($ctime(%month %day $regml(1) $regml(4) $+ : $+ $regml(5) $+ : $+ $floor($regml(6))) - %offset)
     if ($asctime(zz) !== 0 && $regex($v1, /^([+-])(\d\d)(\d+)$/)) {
       inc %time $regml(1) $+ $calc($regml(2) * 3600 + $regml(3))
     }
@@ -344,21 +344,24 @@ alias mTwitch.ConvertTime {
 }
 
 
-;; $mTwitch.MsgTags(@Taglist, @Tagname)
-;;   Returns $false if the tag does NOT exist
-;;   Returns $true if the tag exists without a value
-;;   Returns the value if the tag exists with a value
+;; $mTwitch.MsgTags(@Taglist, @Tagname).exists
+;;   Returns $null if the tag does NOT exist
+;;   Returns $true if the tag exists and the prop is .exists
+;;   Returns the value if the tag exists
 alias mTwitch.MsgTags {
   if (!$isid || $0 < 2) {
     return
   }
   if ($wildtok($iif(@* iswm $1, $mid($1, 2-), $1), $2 $+ =*, 1, 59)) {
-    if ($mid($v1, $calc($len($2) + 2) $+ -) !== $null) {
+    var %tag = $v1
+    if ($prop == exists) {
+      return $true
+    }
+    elseif ($mid(%tag, $calc($len($2) + 2) $+ -) !== $null) {
       return $regsubex($v1, /\\(.)/g, $mTwitch.MsgTagsUnescape(\1))
     }
-    return $true
   }
-  return $false
+  return
 }
 
 
