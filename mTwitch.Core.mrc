@@ -201,6 +201,26 @@ raw HOSTTARGET:*:{
 }
 
 
+;; =============================== ;;
+;;     Manage Sub/Resub events     ;;
+;; =============================== ;;
+
+
+raw USERNOTICE:*:{
+  if ($mTwitch.isServer) {
+    if ($msgtags(msg-id).key == resub) {
+      tokenize 32 $rawmsg
+      .parseline -iqtn @ $+ $msgtags :jtv!jtv@tmi.twitch.tv PRIVMSG $3 :04 $+ $mTwitch.MsgTags($msgtags, system-msg)
+      .signal mTwitch.ReSub $3 $msgtags(login).key $msgtags(msg-param-months).key $mid($4-, 2-)
+      halt
+    }
+    else {
+      ;; new sub? follow? other things?
+    }
+  }
+}
+
+
 ;; ================================ ;;
 ;;     Hide USERSTATE messages      ;;
 ;; ================================ ;;
@@ -273,7 +293,7 @@ on *:UNLOAD:{
 
 ;; Returns the core versioning
 alias mTwitch.has.core {
-  return 0000.0000.0017
+  return 0000.0000.0018
 }
 
 

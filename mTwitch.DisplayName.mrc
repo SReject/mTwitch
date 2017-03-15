@@ -1,6 +1,7 @@
 alias mTwitch.has.DisplayName {
-  return 0000.0000.0009
+  return 0000.0000.0010
 }
+
 on *:CONNECT:{
   if ($mTwitch.isServer) {
     JSONOpen -uw mTwitch_NameFix https://api.twitch.tv/kraken/users?login= $+ $mTwitch.UrlEncode($me)
@@ -16,12 +17,13 @@ on *:CONNECT:{
     JSONClose mTwitch_NameFix
   }
 }
+
 on $*:PARSELINE:in:/^(@\S+) \x3A([^!@\s]+)(![^@\s]+@\S+ PRIVMSG \x23?\S+ \x3A.*)$/:{
   var %tags = $regml(1), %nick = $regml(2), %param = $regml(3), %dnick
   if ($mTwitch.isServer) {
     %dnick = $remove($mTwitch.MsgTags(%tags, display-name), $chr(32), $cr, $lf)
     if (%dnick !== $null && %dnick !=== %nick) {
-      %tags = %tags $+ $chr(59) $+ user-name= $+ $nick
+      %tags = %tags $+ $chr(59) $+ user-name= $+ %nick
       .parseline -it %tags $+(:, %dnick, %param)
     }
   }
