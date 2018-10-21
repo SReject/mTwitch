@@ -74,7 +74,7 @@ on $*:PARSELINE:in:/^\x3A(irc|tmi)\.twitch\.tv CAP \* ACK \x3A/:{
 ;; Injects the raw 005 numerical which fills $network with "twitch.tv", $chantypes and $prefix
 raw 004:*:{
   if ($mTwitch.isServer) {
-    .parseline -itqp :tmi.twitch.tv 005 $me NETWORK=twitch.tv CHANTYPES=# PREFIX=(o)@ :are supported by this server
+    .parseline -qtpi :tmi.twitch.tv 005 $me NETWORK=twitch.tv CHANTYPES=# PREFIX=(o)@ :are supported by this server
   }
 }
 
